@@ -1,10 +1,13 @@
 import React from "react"
 
 import Image from "next/image"
+import { useRouter } from "next/router"
 
 import { Button, ContainerScroll, HoverBorderGradient } from "../../ui"
 
 const Hero = () => {
+  const router = useRouter()
+
   return (
     <div className="bg-dot-white/[0.2] flex flex-col overflow-hidden p-5">
       <ContainerScroll
@@ -31,9 +34,16 @@ const Hero = () => {
                 Node Management with Kiitron
               </span>
               <h1 className="sm:text-md mt-[-10px] text-center text-xs font-semibold sm:mt-2 md:text-xl">
-                Permitech is the collaborative workspace for safer, compliant and efficient industrial operations
+                A comprehensive node management solution for Kiichain node runners
               </h1>
-              <Button className="mb-5 mt-3 bg-blue-500 text-white sm:mt-8 sm:p-5 sm:text-lg">Get Started</Button>
+              <Button
+                onClick={() => {
+                  router.push("/deploy")
+                }}
+                className="bg-dark-2 mb-5 mt-3 rounded-md px-5 py-2.5 text-white bg-blend-saturation shadow-sm shadow-white"
+              >
+                Get Started
+              </Button>
             </div>
           </>
         }

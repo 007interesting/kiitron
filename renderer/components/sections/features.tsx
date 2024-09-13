@@ -1,7 +1,6 @@
 import React from "react"
 
 import { BrainCircuit, CalendarPlus, Edit2Icon } from "lucide-react"
-import { BiNotification } from "react-icons/bi"
 import { IoText } from "react-icons/io5"
 import { MdOutlineSpaceDashboard } from "react-icons/md"
 
@@ -10,85 +9,58 @@ import { HamburgerMenuIcon, InputIcon } from "@radix-ui/react-icons"
 import { BentoCard, BentoGrid, ShinyText } from "../../ui"
 import cn from "../../utils/cn"
 import Feature1 from "../features/feature-1"
-// import AiIntegration from "../features/ai_integration"
-// import Integrations from "../features/integration"
-// import AnimatedListDemo from "../features/notification"
-// import PieChartComponent from "../features/PieChart"
-// import Colabration from "../features/team-colobration"
 
 const features = [
   {
-    Icon: Edit2Icon,
-    name: "Fully customisable incident reporting",
-    description: "Get AI-driven recommendations to improve your processes and make data-backed decisions.",
+    Icon: BrainCircuit,
+    name: "AI-Powered Project Insights",
+    description:
+      "Leverage AI to track and predict project milestones. Gain insights on task delays and resource allocation for optimal project management.",
     href: "/",
     cta: "Learn more",
     className: "col-span-1",
     background: (
       <div className="absolute flex transform flex-col items-center justify-center p-5 opacity-60 transition-transform duration-200 [mask-image:linear-gradient(to_top,transparent_20%,#000_80%)] hover:scale-105">
-        <h1 className="mr-auto text-xl font-semibold">Create A Field</h1>
+        <h1 className="mr-auto text-xl font-semibold">AI-Powered Analysis</h1>
         <p className="text-muted-foreground text-sm">
-          Drag A field type to one of the sections on the to create a custom field for the issue type
+          Use AI-driven analytics to forecast project timelines and identify bottlenecks before they occur.
         </p>
         <div className="mt-5 flex gap-2">
           <div className="flex h-[100px] w-[130px] flex-col items-center justify-center rounded-lg border-2 p-2">
+            <BrainCircuit className="h-[20px] w-[20px]" />
+            <h1 className="text-lg font-bold">Predictive Insights</h1>
+          </div>
+          <div className="flex h-[100px] w-[130px] flex-col items-center justify-center rounded-lg border-2 p-2">
             <IoText className="h-[20px] w-[20px]" />
-            <h1 className="text-lg font-bold">Short Text</h1>
-          </div>
-          <div className="flex h-[100px] w-[130px] flex-col items-center justify-center rounded-lg border-2 p-2">
-            <HamburgerMenuIcon className="h-[20px] w-[20px]" />
-            <h1 className="text-lg font-bold">Paragraph</h1>
-          </div>
-          <div className="flex h-[100px] w-[130px] flex-col items-center justify-center rounded-lg border-2 p-2">
-            <CalendarPlus className="h-[20px] w-[20px]" />
-            <h1 className="text-lg font-bold">Date</h1>
+            <h1 className="text-lg font-bold">Smart Recommendations</h1>
           </div>
         </div>
       </div>
     ),
   },
   {
-    Icon: InputIcon,
-    name: "Unparalleled team collaboration",
-    description: "Collaborate right within issues, assign tasks, attach documents, add comments and track progress. ",
+    Icon: MdOutlineSpaceDashboard,
+    name: "Comprehensive Node Dashboard",
+    description:
+      "Monitor and visualize critical node metrics in real-time, including block details, transactions, peers, bandwidth usage, and resource consumption.",
     href: "/",
     cta: "Learn more",
     className: "col-span-2",
     background: (
-      <div className="absolute w-full transform p-5 opacity-60 transition-transform duration-300 [mask-image:linear-gradient(to_top,transparent_64%,#000_80%)] hover:scale-105">
+      <div className="absolute w-full transform p-5 opacity-80 transition-transform duration-300 hover:scale-105">
         <Feature1 />
       </div>
     ),
   },
-  //   {
-  //     Icon: VscDebugDisconnect,
-  //     name: "Powerful integrations",
-  //     description:
-  //       "Integrate popular security software, Connected cameras, IoT devices as well as popular ERP solutions effortlessly.",
-  //     href: "/",
-  //     cta: "Learn more",
-  //     className: "col-span-3 lg:col-span-2",
-  //     background: (
-  //       <div className="absolute flex w-full transform items-center justify-center p-5 opacity-60 transition-transform duration-300 [mask-image:linear-gradient(to_top,transparent_5%,#000_80%)] hover:scale-105">
-  //         <Integrations />
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     Icon: MdOutlineSpaceDashboard,
-  //     name: "Leading and lagging KPI indicators",
-  //     description:
-  //       "Aggregate and share all industry standard KPIs and create a project control centre with customisable dashboards",
-  //     href: "/",
-  //     cta: "Learn more",
-  //     className: "col-span-3 lg:col-span-1",
-  //     background: (
-  //       <div className="absolute flex w-full transform flex-col items-center justify-center p-5 opacity-60 transition-transform duration-300 [mask-image:linear-gradient(to_top,transparent_25%,#000_80%)] hover:scale-105">
-  //         <h1 className="mr-auto text-xl font-bold">Incidents</h1>
-  //         <PieChartComponent />
-  //       </div>
-  //     ),
-  //   },
+  {
+    Icon: MdOutlineSpaceDashboard,
+    name: "KPI Indicators & Dashboards",
+    description: "Customizable dashboards with all industry-standard KPIs for better tracking and control.",
+    href: "/",
+    cta: "Learn more",
+    className: "col-span-3 lg:col-span-2",
+    background: <></>,
+  },
 ]
 
 const Features = () => {
