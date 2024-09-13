@@ -1,13 +1,15 @@
-// BLOCKS https://b.sentry.testnet.kiivalidator.com/cosmos/base/tendermint/v1beta1/blocks/1499274
-// TRANSACTIONS https://kii.backend.kiivalidator.com/transactions
-
 import React, { createContext, useContext, useEffect, useState } from "react"
 
 import axios from "axios"
+import { Systeminformation } from "systeminformation"
 
 interface IMonitoringContext {
   transactions: Transaction[]
   blocks: Block[]
+  transactionCount: number
+  latestBlockHeight: string
+  successRate: number
+  systemInfo: MonitoringContextProps[]
 }
 
 type IMonitoringProvider = IProvider
@@ -15,6 +17,9 @@ type IMonitoringProvider = IProvider
 const defaultValues: IMonitoringContext = {
   transactions: [],
   blocks: [],
+  transactionCount: 0,
+  latestBlockHeight: "0",
+  successRate: 0,
 }
 
 const MonitoringContext = createContext<IMonitoringContext>(defaultValues)
@@ -23,50 +28,76 @@ const MonitoringProvider: React.FC<IMonitoringProvider> = ({ children }) => {
   // States
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [blocks, setBlocks] = useState<Block[]>([])
+  const [transactionCount, setTransactionCount] = useState(0)
+  const [latestBlockHeight, setLatestBlockHeight] = useState("0")
+  const [successRate, setSuccessRate] = useState(0)
+  const [systemInfo, setSystemInfo] = useState<MonitoringContextProps[]>([])
 
   // Effects
   // Poll transactions x 60 seconds
+  // Fetch transactions every 60 seconds
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const response = await axios.get<{
           success: boolean
-          errorMessage?: string
           transactions: Transaction[]
-          quantity: number
-          page: number
         }>("https://kii.backend.kiivalidator.com/transactions")
-        setTransactions(response.data.transactions)
+        const fetchedTransactions = response.data.transactions
+        setTransactions(fetchedTransactions)
+
+        // Update transaction count and success rate
+        setTransactionCount(fetchedTransactions.length)
+        const successfulTransactions = fetchedTransactions.filter((tx) => tx.success).length
+        setSuccessRate((successfulTransactions / fetchedTransactions.length) * 100)
       } catch (error) {
         console.error("Error fetching transactions:", error)
       }
     }
 
     fetchTransactions()
-
-    const interval = setInterval(fetchTransactions, 60_000)
+    const interval = setInterval(fetchTransactions, 60000)
     return () => clearInterval(interval)
   }, [])
 
-  // Poll blocks x 60 seconds
+  // Fetch blocks every 60 seconds
   useEffect(() => {
     const fetchBlocks = async () => {
       try {
         const response = await axios.get<{
           success: boolean
-          errorMessage?: string
           blocks: Block[]
-          quantity: number
-          page: number
         }>("https://b.sentry.testnet.kiivalidator.com/cosmos/base/tendermint/v1beta1/blocks")
-        setBlocks(response.data.blocks)
+        const fetchedBlocks = response.data.blocks
+        setBlocks(fetchedBlocks)
+
+        // Update latest block height
+        if (fetchedBlocks.length > 0) {
+          setLatestBlockHeight(fetchedBlocks[0].block.header.height)
+        }
       } catch (error) {
         console.error("Error fetching blocks:", error)
       }
     }
 
     fetchBlocks()
-    const interval = setInterval(fetchBlocks, 60_000)
+    const interval = setInterval(fetchBlocks, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Fetch system info every 60 seconds
+  useEffect(() => {
+    const fetchSystemInfo = async () => {
+      if (typeof window !== "undefined" && window.ipc) {
+        const info = (await window.ipc.invoke("get-system-info", {})) as MonitoringContextProps
+        setSystemInfo((prev) => [...prev, info])
+        console.log({ info })
+      }
+    }
+
+    fetchSystemInfo()
+    const interval = setInterval(fetchSystemInfo, 60_000)
+
     return () => clearInterval(interval)
   }, [])
 
@@ -75,6 +106,10 @@ const MonitoringProvider: React.FC<IMonitoringProvider> = ({ children }) => {
       value={{
         transactions,
         blocks,
+        latestBlockHeight,
+        transactionCount,
+        successRate,
+        systemInfo,
       }}
     >
       {children}
@@ -176,4 +211,15 @@ interface Block {
       }>
     }
   }
+}
+
+// System
+interface MonitoringContextProps {
+  cpu: Systeminformation.CpuData
+  mem: Systeminformation.MemData
+  disk: Systeminformation.DisksIoData
+  network: Systeminformation.NetworkStatsData
+  gpu: Systeminformation.GraphicsData
+  currentLoad: Systeminformation.CurrentLoadData
+  uptime: Systeminformation.TimeData
 }

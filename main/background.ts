@@ -1,6 +1,8 @@
 import path from "path"
 import { app, ipcMain } from "electron"
 import serve from "electron-serve"
+import si from "systeminformation"
+
 import { createWindow } from "./helpers"
 
 const isProd = process.env.NODE_ENV === "production"
@@ -15,8 +17,8 @@ if (isProd) {
   await app.whenReady()
 
   const mainWindow = createWindow("main", {
-    width: 1000,
-    height: 600,
+    width: 1520,
+    height: 880,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -37,4 +39,28 @@ app.on("window-all-closed", () => {
 
 ipcMain.on("message", async (event, arg) => {
   event.reply("message", `${arg} World!`)
+})
+
+ipcMain.handle("get-system-info", async () => {
+  try {
+    const cpu = await si.cpu()
+    const mem = await si.mem()
+    const disk = await si.fsStats()
+    const network = await si.networkStats()
+    const gpu = await si.graphics()
+    const currentLoad = await si.currentLoad()
+    const uptime = await si.time()
+
+    return {
+      cpu,
+      mem,
+      disk,
+      network,
+      gpu,
+      currentLoad,
+      uptime,
+    }
+  } catch (err) {
+    console.error(err)
+  }
 })

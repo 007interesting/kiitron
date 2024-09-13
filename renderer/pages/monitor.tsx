@@ -38,7 +38,7 @@ const NodeMonitoringPage = () => {
           <div className="space-y-2">
             <CurrentBlock />
             <PeerCount />
-            <NetworkTraffic />
+            <NetworkInfo />
             <DiskActivity />
           </div>
 
@@ -54,8 +54,10 @@ const NodeMonitoringPage = () => {
 
           {/* Column 3 */}
           <div className="space-y-2">
-            <RPCRequests />
-            <ChainDataDiskSize />
+            <CpuInfo />
+            <DiskInfo />
+            {/* <RPCRequests />
+            <ChainDataDiskSize /> */}
           </div>
         </div>
       </div>
@@ -271,3 +273,268 @@ const ChainDataDiskSize = () => {
     </Container>
   )
 }
+
+// *** SYSTEM ***
+const CpuInfo: React.FC = () => {
+  const { systemInfo } = useMonitoring()
+
+  const [cpuInfo, setCpuInfo] = useState({
+    speedMin: Infinity,
+    speedMax: 0,
+    averageSpeed: 0,
+  })
+
+  useEffect(() => {
+    const mn = systemInfo[0]?.cpu.speedMin
+    const mx = systemInfo[0]?.cpu.speedMax
+    const avg = systemInfo[0]?.cpu.speed
+
+    setCpuInfo((prev) => ({
+      ...prev,
+      speedMin: mn < prev.speedMin ? mn : prev.speedMin,
+      speedMax: mx > prev.speedMax ? mx : prev.speedMax,
+      averageSpeed: avg,
+    }))
+  }, [systemInfo])
+
+  return (
+    <Container className="">
+      <h2 className="mb-4 text-xl font-semibold">CPU Speed</h2>
+      <ResponsiveContainer width="100%">
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <h3 className="text-lg font-semibold">Average Speed</h3>
+            <div className="text-2xl font-bold text-green-400">{cpuInfo.averageSpeed} GHz</div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Min Speed</h3>
+            <div className="text-2xl font-bold text-blue-400">{cpuInfo.speedMin} GHz</div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Max Speed</h3>
+            <div className="text-2xl font-bold text-red-400">{cpuInfo.speedMax} GHz</div>
+          </div>
+        </div>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const DiskInfo: React.FC = () => {
+  const { systemInfo } = useMonitoring()
+
+  const diskData = systemInfo.map((info) => {
+    const disk = info.disk
+
+    return {
+      name: new Date(disk.ms).toLocaleTimeString(),
+      rx: disk.rIO,
+      wx: disk.wIO,
+      tx: disk.tIO,
+      rx_sec: disk.rIO_sec,
+      wx_sec: disk.wIO_sec,
+      tx_sec: disk.tIO_sec,
+    }
+  })
+
+  return (
+    <Container className="">
+      <h2 className="mb-4 text-xl font-semibold">Disk Activity</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+      >
+        <LineChart data={diskData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="rIO_sec"
+            stroke="#8884d8"
+            name="Read Speed (bytes/s)"
+          />
+          <Line
+            type="monotone"
+            dataKey="wIO_sec"
+            stroke="#82ca9d"
+            name="Write Speed (bytes/s)"
+          />
+          <Line
+            type="monotone"
+            dataKey="tIO_sec"
+            stroke="#8884d8"
+            name="Average Speed (bytes/s)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+      >
+        <LineChart data={diskData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="rIO"
+            stroke="#8884d8"
+            name="Reads (bytes)"
+          />
+          <Line
+            type="monotone"
+            dataKey="wIO"
+            stroke="#82ca9d"
+            name="Writes (bytes)"
+          />
+          <Line
+            type="monotone"
+            dataKey="tIO"
+            stroke="#ffc658"
+            name="Total (bytes)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const NetworkInfo: React.FC = () => {
+  const { systemInfo } = useMonitoring()
+
+  const networkData = systemInfo.map((info) => {
+    const network = info.network
+
+    return {
+      name: new Date(network.ms).toLocaleTimeString(),
+      rx: network.rx_bytes,
+      tx: network.tx_bytes,
+      rx_sec: network.rx_sec,
+      tx_sec: network.tx_sec,
+    }
+  })
+
+  return (
+    <Container className="">
+      <h2 className="mb-4 text-xl font-semibold">Network Activity</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+      >
+        <LineChart data={networkData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="rx_sec"
+            stroke="#8884d8"
+            name="Download Speed (bytes/s)"
+          />
+          <Line
+            type="monotone"
+            dataKey="tx_sec"
+            stroke="#82ca9d"
+            name="Upload Speed (bytes/s)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+      >
+        <LineChart data={networkData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="rx"
+            stroke="#8884d8"
+            name="Downloaded (bytes)"
+          />
+          <Line
+            type="monotone"
+            dataKey="tx"
+            stroke="#82ca9d"
+            name="Uploaded (bytes)"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+// const SystemLoadChart: React.FC = () => {
+//   const { systemInfo } = useMonitoring()
+
+//   const loadData = systemInfo.map((info) => {
+//     const load = info.currentLoad
+
+//     return {
+//       name: new Date(info.ms).toLocaleTimeString(),
+//       avgLoad: load.avgLoad,
+//       currentLoad: load.currentLoad,
+//       userLoad: load.currentLoadUser,
+//       systemLoad: load.currentLoadSystem,
+//       idleLoad: load.currentLoadIdle,
+//     }
+//   })
+
+//   return (
+//     <Container>
+//       <h2 className="text-xl font-bold">System Load</h2>
+//       <ResponsiveContainer
+//         width="100%"
+//         height={300}
+//       >
+//         <LineChart data={loadData}>
+//           <CartesianGrid strokeDasharray="3 3" />
+//           <XAxis dataKey="name" />
+//           <YAxis />
+//           <Tooltip />
+//           <Legend />
+//           <Line
+//             type="monotone"
+//             dataKey="avgLoad"
+//             stroke="#8884d8"
+//             name="Average Load"
+//           />
+//           <Line
+//             type="monotone"
+//             dataKey="currentLoad"
+//             stroke="#82ca9d"
+//             name="Current Load"
+//           />
+//           <Line
+//             type="monotone"
+//             dataKey="userLoad"
+//             stroke="#ffc658"
+//             name="User Load"
+//           />
+//           <Line
+//             type="monotone"
+//             dataKey="systemLoad"
+//             stroke="#ff7300"
+//             name="System Load"
+//           />
+//           <Line
+//             type="monotone"
+//             dataKey="idleLoad"
+//             stroke="#00c49f"
+//             name="Idle Load"
+//           />
+//         </LineChart>
+//       </ResponsiveContainer>
+//     </Container>
+//   )
+// }
