@@ -4,7 +4,7 @@ import React from "react"
 
 import { Drawer } from "vaul"
 
-import { useMediaQuery } from "@/hooks"
+import { useMediaQuery } from "../../hooks"
 
 const ResponsiveDrawer = () => {
   const isMobile = useMediaQuery("(max-width: 640px)")

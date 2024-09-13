@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react"
 
 import { ModalProvider } from "./modal"
+import { ThemeProvider } from "./theme"
 import { UserProvider } from "./user"
 
 interface ProvidersProps {
@@ -21,11 +22,18 @@ const Providers: React.FC<ProvidersProps> = ({ children }) => {
   }
 
   return (
-    <ModalProvider>
-      <UserProvider>
-        <>{children}</>
-      </UserProvider>
-    </ModalProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <ModalProvider>
+        <UserProvider>
+          <>{children}</>
+        </UserProvider>
+      </ModalProvider>
+    </ThemeProvider>
   )
 }
 
