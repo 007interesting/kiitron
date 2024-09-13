@@ -13,6 +13,13 @@ const handler = {
     }
   },
   invoke: (channel, data) => ipcRenderer.invoke(channel, data),
+  onCommandOutput: (callback: (data: string) => void) => {
+    ipcRenderer.on("command-output", (event, data) => callback(data))
+  },
+  onCommandError: (callback: (error: string) => void) => {
+    ipcRenderer.on("command-error", (event, error) => callback(error))
+  },
+  runCommand: (command) => ipcRenderer.send("run-command", command),
 }
 
 contextBridge.exposeInMainWorld("ipc", handler)

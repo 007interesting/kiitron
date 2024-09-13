@@ -1,23 +1,22 @@
-import React, { useState } from "react"
-
+import React, { useState, useEffect } from "react"
 import { UploadIcon } from "lucide-react"
-
 import { Switch } from "@headlessui/react"
-
 import { Button } from "../ui"
 
 const DeployPage = () => {
   const [validatorName, setValidatorName] = useState("")
   const [filePath, setFilePath] = useState("~/config/.kiitron")
   const [debugMode, setDebugMode] = useState(false)
-
+  const [commandOutput, setCommandOutput] = useState("")
   const [deploying, setDeploying] = useState(false)
+  const [isStarted, setIsStarted] = useState(false)
 
   const handleDeploy = () => {
     setDeploying(true)
+    setCommandOutput("")
+    setIsStarted(true)
 
-    // Deploy script to deploy the validator
-    // TODO: Import the deploy script and run it
+    window.ipc.runCommand("deploy-validator")
 
     console.log({
       validatorName,
@@ -27,11 +26,62 @@ const DeployPage = () => {
     })
   }
 
-  return (
+  const handleExportPrivateKey = async () => {
+    try {
+      const result = await window.ipc.invoke("save-key");
+      console.log(result)
+  
+      // Prompt user to save the file (use Electron's file save dialog)
+      const { filePath } = await window.ipc.invoke("show-save-dialog");
+  
+      if (filePath) {
+        // Save the result to the selected file
+        await window.ipc.writeFile(filePath, result);
+        alert("Private key exported successfully!");
+      }
+    } catch (error) {
+      console.error("Error exporting private key:", error);
+      alert("Failed to export private key.");
+    }
+  };
+
+  useEffect(() => {
+    const handleOutput = (output) => {
+      setCommandOutput((prev) => prev + "\n" + output)
+    }
+
+    const handleError = (error) => {
+      setCommandOutput((prev) => prev + "\nError: " + error)
+    }
+
+    window.ipc.onCommandOutput(handleOutput)
+    window.ipc.onCommandError(handleError)
+
+    return () => {
+      window.ipc.onCommandOutput(() => {})
+      window.ipc.onCommandError(() => {})
+    }
+  }, [])
+
+  return isStarted ? (
+	<div className="flex items-center justify-center bg-gray-900 p-6 text-gray-100">
+	  <div className="mt-4 rounded-lg bg-gray-700 p-4 text-white relative">
+	    <h2 className="text-lg font-bold">Logs :</h2>
+	    <pre>{commandOutput}</pre>
+	    
+	    {/* Export Private Key Button */}
+	    <button
+	      onClick={handleExportPrivateKey}
+	      className="absolute bottom-4 right-4 bg-primary hover:bg-primary-dark rounded-lg px-4 py-2 text-gray-100 font-medium"
+	    >
+	      Export Private Key
+	    </button>
+	  </div>
+	</div>
+) : (
     <div className="flex min-h-screen items-center justify-center bg-gray-900 p-6 text-gray-100">
       <div className="w-full max-w-lg space-y-6 rounded-lg bg-gray-800 p-8 shadow-lg">
         <h1 className="text-primary text-center text-2xl font-bold">Deploy Validator</h1>
-
         <form className="space-y-4">
           {/* Validator Name */}
           <div>
@@ -64,28 +114,28 @@ const DeployPage = () => {
 
           {/* File Path */}
           {/* <div>
-            <label
+              <label
               htmlFor="filePath"
               className="block text-sm font-medium"
-            >
+              >
               Location for Files
-            </label>
-            <div className="mt-1 flex items-center">
+              </label>
+              <div className="mt-1 flex items-center">
               <input
-                type="file"
-                id="filePath"
-                onChange={handleFileChange}
-                className="hidden"
+              type="file"
+              id="filePath"
+              onChange={handleFileChange}
+              className="hidden"
               />
               <label
-                htmlFor="filePath"
-                className="bg-primary hover:bg-primary-dark inline-flex cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-100"
+              htmlFor="filePath"
+              className="bg-primary hover:bg-primary-dark inline-flex cursor-pointer items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-gray-100"
               >
-                <UploadIcon className="mr-2 h-5 w-5" />
-                {filePath ? filePath : "Browse Files"}
+              <UploadIcon className="mr-2 h-5 w-5" />
+              {filePath ? filePath : "Browse Files"}
               </label>
-            </div>
-          </div> */}
+              </div>
+              </div> */}
           <div>
             <label
               htmlFor="filePath"

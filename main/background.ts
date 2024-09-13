@@ -2,6 +2,9 @@ import path from "path"
 import { app, ipcMain } from "electron"
 import serve from "electron-serve"
 import si from "systeminformation"
+import { dialog } from "electron"
+
+const { spawn } = require("child_process")
 
 import { createWindow } from "./helpers"
 
@@ -28,7 +31,7 @@ if (isProd) {
     await mainWindow.loadURL("app://./home")
   } else {
     const port = process.argv[2]
-    await mainWindow.loadURL(`http://localhost:${port}/monitor`)
+    await mainWindow.loadURL(`http://localhost:${port}/deploy`)
     mainWindow.webContents.openDevTools()
   }
 })()
@@ -64,3 +67,94 @@ ipcMain.handle("get-system-info", async () => {
     console.error(err)
   }
 })
+
+function streamCommand(command, args, onData, onError, onClose) {
+  const cmd = spawn(command, args, { shell: "bash" })
+
+  cmd.stdout.on("data", (data) => {
+    onData(data.toString())
+  })
+
+  cmd.stderr.on("data", (data) => {
+    onError(data.toString())
+  })
+
+  cmd.on("close", (code) => {
+    onClose(`Command exited with code ${code}`)
+  })
+}
+
+ipcMain.on("run-command", (event, command) => {
+  const commands = [
+    {
+      command: "chmod",
+      args: ["+x", "/home/lavesh/Project/kiitron/run.sh"],
+    },
+    {
+      command: "/home/lavesh/Project/kiitron/run.sh"
+    }
+  ]
+
+  const runNextCommand = (index = 0) => {
+    if (index >= commands.length) {
+      event.sender.send("command-output", "All commands completed.")
+      return
+    }
+
+    const { command, args } = commands[index]
+
+    streamCommand(
+      command,
+      args,
+      (data) => event.sender.send("command-output", data),
+      (error) => event.sender.send("command-error", error),
+      (exitMessage) => {
+        event.sender.send("command-output", exitMessage)
+        runNextCommand(index + 1)
+      }
+    )
+  }
+
+  runNextCommand()
+})
+
+ipcMain.handle("save-key", async (event) => {
+  return new Promise((resolve, reject) => {
+    const commands = [
+      {
+        command: "/home/lavesh/kiichain/build/bin/kiichaind",
+        args: ["comet", "show-validator", "--home", "/home/lavesh"],
+      },
+    ];
+
+    const runNextCommand = (index = 0) => {
+      if (index >= commands.length) {
+        resolve("All commands completed.");
+        return;
+      }
+
+      const { command, args } = commands[index];
+
+      streamCommand(
+        command,
+        args,
+        (data) => resolve(data), // Send the command output back to the renderer
+        (error) => reject(error), // Send the error back to the renderer
+        (exitMessage) => {
+          resolve(exitMessage); // Resolve when the command completes
+        }
+      );
+    };
+
+    runNextCommand();
+  });
+});
+
+ipcMain.handle("show-save-dialog", async (event) => {
+  const { filePath } = await dialog.showSaveDialog({
+    title: "Save Private Key",
+    defaultPath: "private_key.txt",
+  });
+
+  return filePath; // Return the path chosen by the user
+});
