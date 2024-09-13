@@ -1,0 +1,273 @@
+import React, { useEffect, useState } from "react"
+
+import axios from "axios"
+import clsx from "clsx"
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
+
+import { MonitoringProvider, useMonitoring } from "../providers/monitoring"
+
+const data = [
+  { name: "17:20", transactions: 6.9, pending: 5000, peers: 51, outgoing: 195, incoming: 72 },
+  { name: "17:25", transactions: 11.8, pending: 5100, peers: 48, outgoing: 176, incoming: 71 },
+  { name: "17:30", transactions: 4.5, pending: 4800, peers: 49, outgoing: 180, incoming: 73 },
+  { name: "17:35", transactions: 8.6, pending: 4900, peers: 50, outgoing: 190, incoming: 70 },
+  // More data points as needed
+]
+
+const NodeMonitoringPage = () => {
+  const [debugMode, setDebugMode] = useState(false)
+
+  return (
+    <MonitoringProvider>
+      <div className="bg-dark-0 text-light-1 min-h-screen p-6">
+        <div className="grid grid-cols-4 gap-2">
+          {/* Column 1 */}
+          <div className="space-y-2">
+            <CurrentBlock />
+            <PeerCount />
+            <NetworkTraffic />
+            <DiskActivity />
+          </div>
+
+          {/* Column 2 */}
+          <div className="col-span-2 space-y-2">
+            <div className="center gap-2">
+              <TransactionRate />
+              <PendingTransactions />
+            </div>
+            <TransactionChart />
+            <Peers />
+          </div>
+
+          {/* Column 3 */}
+          <div className="space-y-2">
+            <RPCRequests />
+            <ChainDataDiskSize />
+          </div>
+        </div>
+      </div>
+    </MonitoringProvider>
+  )
+}
+
+export default NodeMonitoringPage
+
+const Container: React.FC<{ className?: string } & IChildren> = ({ children, className }) => {
+  return <div className={clsx("w-full rounded-lg bg-gray-800 p-4")}>{children}</div>
+}
+
+const CurrentBlock = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Current Block</h2>
+      <div className="text-3xl font-bold text-blue-400">14,207,006</div>
+      <div>Last Received Block</div>
+      <div className="text-2xl font-bold">14,207,006</div>
+    </Container>
+  )
+}
+
+const PeerCount = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Peer Count</h2>
+      <div className="mt-6 text-center text-4xl font-bold text-green-400">51</div>
+    </Container>
+  )
+}
+
+const NetworkTraffic = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Network Traffic (bytes/s)</h2>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg">Out</h3>
+          <div className="text-2xl font-bold text-yellow-300">160 KiB</div>
+        </div>
+        <div>
+          <h3 className="text-lg">In</h3>
+          <div className="text-2xl font-bold text-yellow-300">72 KiB</div>
+        </div>
+      </div>
+    </Container>
+  )
+}
+
+const DiskActivity = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Disk Activity (bytes/s)</h2>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <h3 className="text-lg">Read</h3>
+          <div className="text-2xl font-bold text-purple-300">103 MiB</div>
+        </div>
+        <div>
+          <h3 className="text-lg">Write</h3>
+          <div className="text-2xl font-bold text-purple-300">52.6 MiB</div>
+        </div>
+      </div>
+    </Container>
+  )
+}
+
+const TransactionChart: React.FC = () => {
+  const { transactions } = useMonitoring()
+
+  return (
+    <Container>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <LineChart data={transactions}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="block.header.height" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line
+            type="monotone"
+            dataKey="block.header.time"
+            stroke="#8884d8"
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const TransactionRate = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Transaction Rate (tx/s)</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <LineChart data={data}>
+          <Line
+            type="monotone"
+            dataKey="transactions"
+            stroke="#FFA500"
+          />
+          <CartesianGrid stroke="#444444" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const PendingTransactions = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Pending Transactions</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <AreaChart data={data}>
+          <Area
+            type="monotone"
+            dataKey="pending"
+            stroke="#FFD700"
+            fill="#FFD700"
+          />
+          <CartesianGrid stroke="#444444" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+        </AreaChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const Peers = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Peers</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <BarChart data={data}>
+          <Bar
+            dataKey="peers"
+            fill="#32CD32"
+          />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <CartesianGrid stroke="#444444" />
+        </BarChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const RPCRequests = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">RPC Requests</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <LineChart data={data}>
+          <Line
+            type="monotone"
+            dataKey="pending"
+            stroke="#FF1493"
+          />
+          <CartesianGrid stroke="#444444" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+        </LineChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
+
+const ChainDataDiskSize = () => {
+  return (
+    <Container>
+      <h2 className="text-xl font-bold">Chain Data Disk Size</h2>
+      <ResponsiveContainer
+        width="100%"
+        height={150}
+      >
+        <AreaChart data={data}>
+          <Area
+            type="monotone"
+            dataKey="incoming"
+            stroke="#DA70D6"
+            fill="#DA70D6"
+          />
+          <CartesianGrid stroke="#444444" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+        </AreaChart>
+      </ResponsiveContainer>
+    </Container>
+  )
+}
