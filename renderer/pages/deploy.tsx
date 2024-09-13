@@ -11,19 +11,20 @@ const DeployPage = () => {
   const [filePath, setFilePath] = useState("~/config/.kiitron")
   const [debugMode, setDebugMode] = useState(false)
 
+  const [deploying, setDeploying] = useState(false)
+
   const handleDeploy = () => {
+    setDeploying(true)
+
+    // Deploy script to deploy the validator
+    // TODO: Import the deploy script and run it
+
     console.log({
       validatorName,
       chain: "Kiichain",
       filePath,
       debugMode,
     })
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFilePath(e.target.files[0].name)
-    }
   }
 
   return (
