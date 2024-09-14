@@ -28,54 +28,51 @@ const data = [
 ]
 
 const NodeMonitoringPage = () => {
-  const [debugMode, setDebugMode] = useState(false)
+  const [debugMode, setDebugMode] = useState(false);
 
   return (
     <MonitoringProvider>
-      <div className="bg-dark-0 text-light-1 min-h-screen p-6">
-        <div className="grid grid-cols-4 gap-2">
-          {/* Column 1 */}
-          <div className="space-y-2">
+      <div className="bg-black text-light-1 min-h-screen p-6 bg-dot-white/[0.2]">
+        {/* Title */}
+        <h1 className="text-4xl font-bold text-center mb-6">Node Monitoring Dashboard</h1>
+        <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-6">
             <CurrentBlock />
             <PeerCount />
             <NetworkInfo />
             <DiskActivity />
           </div>
-
-          {/* Column 2 */}
-          <div className="col-span-2 space-y-2">
-            <div className="center gap-2">
-              <TransactionRate />
-              <PendingTransactions />
-            </div>
+          <div className="col-span-2 space-y-6">
+            <TransactionRate />
+            <PendingTransactions />
             <TransactionChart />
             <Peers />
-          </div>
-
-          {/* Column 3 */}
-          <div className="space-y-2">
             <CpuInfo />
-            <DiskInfo />
-            {/* <RPCRequests />
-            <ChainDataDiskSize /> */}
           </div>
+        </div>
+        <div className="py-4">
+          <DiskInfo />
         </div>
       </div>
     </MonitoringProvider>
-  )
+  );
 }
 
 export default NodeMonitoringPage
 
 const Container: React.FC<{ className?: string } & IChildren> = ({ children, className }) => {
-  return <div className={clsx("w-full rounded-lg bg-gray-800 p-4")}>{children}</div>
+  return (
+    <div className={clsx("w-full rounded-lg bg-gray-900 p-6 shadow-md", className)}>
+      {children}
+    </div>
+  )
 }
 
 const CurrentBlock = () => {
   return (
     <Container>
-      <h2 className="text-xl font-bold">Current Block</h2>
-      <div className="text-3xl font-bold text-blue-400">14,207,006</div>
+      <h2 className="text-lg font-semibold text-light-1">Current Block</h2>
+      <div className="text-2xl font-bold text-blue-400">14,207,006</div>
       <div>Last Received Block</div>
       <div className="text-2xl font-bold">14,207,006</div>
     </Container>

@@ -12,7 +12,7 @@ const HomePage = () => {
         <title>Home - Nextron (with-tailwindcss)</title>
       </Head>
       <Provider>
-        <div className="dark">
+        <div className="dark bg-gradient-to-b from-gray-900 to-black bg-dot-white/[0.2]">
           {/* Hero section */}
           <Hero />
 

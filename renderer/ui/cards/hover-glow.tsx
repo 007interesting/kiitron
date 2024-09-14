@@ -72,7 +72,7 @@ const HoverBorderGradient: React.FC<HoverBorderGradientProps> = ({
     >
       <div className={cn("z-10 w-auto rounded-[inherit] bg-black px-4 py-2 text-white", className)}>{children}</div>
       <motion.div
-        className={cn("absolute inset-0 z-0 flex-none overflow-hidden rounded-[inherit]")}
+        className={cn("absolute inset-0 z-0 flex-none overflow-hidden rounded-full")}
         style={{
           filter: "blur(2px)",
           position: "absolute",

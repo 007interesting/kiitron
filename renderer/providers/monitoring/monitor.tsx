@@ -67,7 +67,7 @@ const MonitoringProvider: React.FC<IMonitoringProvider> = ({ children }) => {
         const response = await axios.get<{
           success: boolean
           blocks: Block[]
-        }>("https://b.sentry.testnet.kiivalidator.com/cosmos/base/tendermint/v1beta1/blocks")
+        }>("https://a.sentry.testnet.kiivalidator.com/cosmos/base/tendermint/v1beta1/blocks/1516450")
         const fetchedBlocks = response.data.blocks
         setBlocks(fetchedBlocks)
 
